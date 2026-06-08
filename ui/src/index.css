@@ -1,0 +1,3 @@
+/* 라이트테마 강제 (Vite 기본 다크 미디어쿼리 제거) */
+html { color-scheme: light; }
+body { margin: 0; background: #f6f8fb; }

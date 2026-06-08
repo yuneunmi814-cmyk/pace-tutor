@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.sqlite3
+build/
+dist/
+
+# Node / Vite
+ui/node_modules/
+ui/dist/
+node_modules/
+
+# Tauri / Rust
+ui/src-tauri/target/
+ui/src-tauri/gen/
+
+# PyInstaller sidecar binary (75MB — build locally via build script)
+ui/src-tauri/binaries/
+
+# macOS
+.DS_Store

@@ -1,0 +1,108 @@
+/* pace-tutor — 라이트테마 (사용자 선호: 다크모드 지양) */
+:root {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --ink: #1c2430;
+  --muted: #6b7785;
+  --line: #e3e8ef;
+  --brand: #2563eb;
+  --brand-soft: #e8f0fe;
+  --target: #dc2626;
+  --target-soft: #fde8e8;
+  --known: #16a34a;
+  --known-soft: #e7f6ec;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  font-family: -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif;
+  color: var(--ink);
+}
+
+.topbar { display: flex; align-items: center; justify-content: space-between; }
+.lang { display: flex; gap: 6px; }
+.lang button {
+  background: #eef1f6; color: var(--muted); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 600;
+}
+.lang button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+header h1 { margin: 0; font-size: 30px; letter-spacing: -0.5px; }
+header .tag { margin: 4px 0 8px; color: var(--muted); }
+.status { font-size: 13px; }
+.status.ok { color: var(--known); }
+.status.down { color: var(--target); }
+.status.wait { color: var(--muted); }
+.status .retry {
+  background: var(--brand-soft); color: var(--brand); border: none;
+  border-radius: 8px; padding: 3px 10px; font-size: 12px; font-weight: 600; margin-left: 8px;
+}
+
+.err {
+  background: var(--target-soft); color: var(--target);
+  border: 1px solid #f3c0c0; border-radius: 10px; padding: 10px 14px; margin: 12px 0;
+  font-size: 14px; white-space: pre-wrap;
+}
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 20px 22px; margin-top: 18px; box-shadow: 0 1px 2px rgba(16,24,40,.04);
+}
+.card h2 { margin: 0 0 14px; font-size: 17px; }
+
+textarea {
+  width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+  font-size: 14px; line-height: 1.6; resize: vertical; color: var(--ink); background: #fcfdff;
+  font-family: inherit;
+}
+
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.hint { color: var(--muted); font-size: 13px; margin: 10px 0; }
+
+button {
+  background: var(--brand); color: #fff; border: none; border-radius: 10px;
+  padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+button:hover { filter: brightness(1.05); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.ghost { background: var(--brand-soft); color: var(--brand); }
+
+select {
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 14px;
+  background: #fff; color: var(--ink);
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f1f4f9; border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 8px 6px 12px; font-size: 14px; cursor: pointer; user-select: none;
+}
+.chip.known { background: var(--known-soft); border-color: #bfe6cb; color: var(--known); }
+.chip.target { background: var(--target-soft); border-color: #f3c0c0; color: var(--target); }
+.chip .tbtn {
+  background: rgba(0,0,0,.06); color: var(--muted); font-weight: 600;
+  border-radius: 999px; padding: 2px 8px; font-size: 11px;
+}
+.chip.target .tbtn { background: var(--target); color: #fff; }
+
+.result .next {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--brand-soft); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+}
+.next .nlabel { font-size: 12px; color: var(--brand); font-weight: 600; }
+.next .nname { font-size: 22px; font-weight: 800; color: var(--ink); }
+
+.stepper { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; }
+.step { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+.snum {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 999px; background: var(--brand); color: #fff;
+  font-size: 12px; font-weight: 700;
+}
+.arrow { color: var(--muted); margin: 0 2px; }

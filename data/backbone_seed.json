@@ -1,0 +1,16 @@
+[
+  {"id": "gcd", "name": "최대공약수", "prereqs": [], "aliases": ["최대 공약수", "공약수"], "grade": "초5"},
+  {"id": "reduce_fraction", "name": "약분", "prereqs": ["gcd"], "aliases": [], "grade": "초5"},
+  {"id": "common_denominator", "name": "통분", "prereqs": ["gcd"], "aliases": [], "grade": "초5"},
+  {"id": "fraction_add", "name": "분수의 덧셈", "prereqs": ["reduce_fraction", "common_denominator"], "aliases": ["분수 덧셈", "분수의 합"], "grade": "초5"},
+  {"id": "linear_equation", "name": "일차방정식", "prereqs": ["fraction_add"], "aliases": ["일차 방정식"], "grade": "중1"},
+  {"id": "factoring", "name": "인수분해", "prereqs": ["linear_equation"], "aliases": ["인수 분해"], "grade": "중3"},
+  {"id": "quadratic_equation", "name": "이차방정식", "prereqs": ["factoring", "linear_equation"], "aliases": ["이차 방정식"], "grade": "중3"},
+
+  {"id": "matter_states", "name": "물질의 상태", "prereqs": [], "aliases": ["물의 상태", "상태 변화", "물의 상태 변화", "물질의 상태 변화", "고체", "액체", "기체", "애체"], "grade": "초3"},
+  {"id": "evaporation", "name": "증발", "prereqs": ["matter_states"], "aliases": ["증발 현상"], "grade": "초4"},
+  {"id": "condensation", "name": "응결", "prereqs": ["matter_states"], "aliases": ["은결", "응축"], "grade": "초4"},
+  {"id": "cloud", "name": "구름", "prereqs": ["condensation"], "aliases": ["구름 형성"], "grade": "초4"},
+  {"id": "precipitation", "name": "강수", "prereqs": ["cloud"], "aliases": ["강수 현상", "비와 눈"], "grade": "초4"},
+  {"id": "water_cycle", "name": "물의 순환", "prereqs": ["evaporation", "condensation", "precipitation"], "aliases": ["물 순환"], "grade": "초4"}
+]
