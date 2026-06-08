@@ -37,9 +37,34 @@ Required secrets:
 | `APPLE_PASSWORD` | an app-specific password (appleid.apple.com) |
 | `APPLE_TEAM_ID` | your 10-char Team ID |
 
-> `src-tauri/tauri.conf.json` ships `signingIdentity: "-"` (ad-hoc) for local dev;
-> `APPLE_SIGNING_IDENTITY` overrides it in CI. `entitlements.plist`
+> `src-tauri/tauri.conf.json` no longer hardcodes a signing identity, so local builds are
+> ad-hoc and CI uses `APPLE_SIGNING_IDENTITY` from the env. `entitlements.plist`
 > (`disable-library-validation`) is required so the bundled Python framework loads.
+
+### Runbook — do this yourself (≈10 min)
+
+> ⚠️ These are **your** credentials. Run the commands locally; never paste secret values
+> into a chat or commit them. `gh secret set NAME` (no value) prompts with hidden input.
+
+1. **Apple Developer Program** membership ($99/yr) — prerequisite.
+2. **Developer ID Application certificate**: create it at developer.apple.com → Certificates,
+   then in **Keychain Access** right-click it → *Export* as `cert.p12` (set a password).
+3. **Team ID & signing identity** (on your Mac, after importing the cert):
+   ```bash
+   security find-identity -v -p codesigning   # copy the "Developer ID Application: Name (TEAMID)" line
+   ```
+4. **App-specific password**: appleid.apple.com → Sign-In and Security → App-Specific Passwords.
+5. **Register the secrets** (run in the repo; each prompts for the hidden value):
+   ```bash
+   base64 -i cert.p12 | gh secret set APPLE_CERTIFICATE      # cert as base64
+   gh secret set APPLE_CERTIFICATE_PASSWORD                  # the .p12 password
+   gh secret set APPLE_SIGNING_IDENTITY                      # Developer ID Application: Name (TEAMID)
+   gh secret set APPLE_ID                                    # your Apple ID email
+   gh secret set APPLE_PASSWORD                              # app-specific password
+   gh secret set APPLE_TEAM_ID                               # 10-char Team ID
+   ```
+6. Verify the names are set (values stay hidden): `gh secret list`.
+7. Release: `git tag v0.1.0 && git push origin v0.1.0` → the macOS job signs + notarizes.
 
 ## Windows / Linux signing
 
