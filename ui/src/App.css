@@ -83,13 +83,13 @@ select {
   background: #f1f4f9; border: 1px solid var(--line); border-radius: 999px;
   padding: 6px 8px 6px 12px; font-size: 14px; cursor: pointer; user-select: none;
 }
-.chip.known { background: var(--known-soft); border-color: #bfe6cb; color: var(--known); }
-.chip.target { background: var(--target-soft); border-color: #f3c0c0; color: var(--target); }
-.chip .tbtn {
-  background: rgba(0,0,0,.06); color: var(--muted); font-weight: 600;
-  border-radius: 999px; padding: 2px 8px; font-size: 11px;
-}
-.chip.target .tbtn { background: var(--target); color: #fff; }
+.chip.confident { background: var(--known-soft); border-color: #bfe6cb; color: var(--known); }
+.chip.unsure { background: #fef3e2; border-color: #f6d9a8; color: #b45309; }
+.chip.none { background: var(--target-soft); border-color: #f3c0c0; color: var(--target); }
+.chip { padding: 6px 12px; }
+.goalflag { margin-left: 6px; }
+.legend { display: flex; gap: 8px; margin: 4px 0 10px; }
+.legend .chip { cursor: default; font-size: 12px; padding: 3px 10px; }
 
 .result .next {
   display: flex; flex-direction: column; gap: 2px;

@@ -6,6 +6,19 @@ import {
 import { STR, SAMPLES, type Locale } from "./i18n";
 import "./App.css";
 
+// 등급형 자기평가 — 답이 틀리기 쉬운 로컬LLM 자동퀴즈 대신 신뢰할 수 있는 진단.
+// 각 등급이 BKT 엔진에 줄 응답(정답1/오답0 시퀀스)으로 매핑된다.
+type Rating = "confident" | "unsure" | "none";
+const CYCLE: (Rating | "untested")[] = ["untested", "none", "unsure", "confident"];
+const RESP: Record<Rating, number[]> = {
+  confident: [1, 1, 1, 1],
+  unsure: [1, 0],
+  none: [0, 0, 0],
+};
+const MARK: Record<Rating | "untested", string> = {
+  untested: "", none: "✗ ", unsure: "~ ", confident: "✓ ",
+};
+
 export default function App() {
   const [loc, setLoc] = useState<Locale>("en");
   const t = STR[loc];
@@ -17,16 +30,15 @@ export default function App() {
   const [transcript, setTranscript] = useState<string>(SAMPLES.en.transcript);
   const [graphId, setGraphId] = useState<string | null>(null);
   const [concepts, setConcepts] = useState<Concept[]>([]);
-  const [known, setKnown] = useState<Set<string>>(new Set());
-  const [target, setTarget] = useState<string | null>(null);
+  const [rating, setRating] = useState<Record<string, Rating>>({});
+  const [goal, setGoal] = useState<string | null>(null);
 
   const [rec, setRec] = useState<RecResult | null>(null);
   const [path, setPath] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // 번들된 사이드카는 첫 실행 시 부팅에 몇 초 걸린다 → 연결될 때까지 폴링/재시도
-  // (청사진 §5-7: 사이드카 ready 대기). null=시작중, true=연결, false=실패.
+  // 번들된 사이드카는 첫 실행 시 부팅에 몇 초 걸린다 → 연결될 때까지 폴링/재시도.
   async function waitForBackend(tries = 30) {
     setOnline(null);
     for (let i = 0; i < tries; i++) {
@@ -42,7 +54,6 @@ export default function App() {
 
   useEffect(() => { waitForBackend(); }, []);
 
-  // 로케일 전환 시, 손대지 않은 기본 샘플이면 해당 언어 샘플로 교체
   function switchLocale(next: Locale) {
     setTranscript((cur) =>
       cur.trim() === SAMPLES.en.transcript.trim() || cur.trim() === SAMPLES.ko.transcript.trim()
@@ -55,7 +66,7 @@ export default function App() {
   const sorted = useMemo(() => [...concepts].sort((a, b) => a.difficulty - b.difficulty), [concepts]);
 
   async function doIngest(kind: "transcript" | "sample") {
-    setBusy(true); setErr(null); setRec(null); setPath([]); setKnown(new Set()); setTarget(null);
+    setBusy(true); setErr(null); setRec(null); setPath([]); setRating({}); setGoal(null);
     try {
       const res = kind === "transcript"
         ? await ingestTranscript(transcript)
@@ -63,7 +74,7 @@ export default function App() {
       setGraphId(res.graph_id);
       setConcepts(res.concepts);
       const hardest = [...res.concepts].sort((a, b) => b.difficulty - a.difficulty)[0];
-      setTarget(hardest?.id ?? null);
+      setGoal(hardest?.id ?? null);   // 기본 목표 = 가장 상위(어려운) 개념
     } catch (e: any) {
       setErr(e.message ?? String(e));
     } finally {
@@ -71,21 +82,30 @@ export default function App() {
     }
   }
 
+  function cycleRating(id: string) {
+    setRating((prev) => {
+      const cur = prev[id] ?? "untested";
+      const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+      const n = { ...prev };
+      if (next === "untested") delete n[id]; else n[id] = next;
+      return n;
+    });
+  }
+
   function buildResponses(): Record<string, number[]> {
     const r: Record<string, number[]> = {};
-    known.forEach((id) => { r[id] = [1, 1, 1, 1]; });
-    if (target) r[target] = [0, 0, 0];
+    for (const [id, rt] of Object.entries(rating)) r[id] = RESP[rt];
     return r;
   }
 
   async function makePlan() {
-    if (!graphId || !target) return;
+    if (!graphId || !goal) return;
     setBusy(true); setErr(null);
     try {
       const responses = buildResponses();
       const [rc, pa] = await Promise.all([
         recommend(graphId, responses, band),
-        getPath(graphId, target, responses, band),
+        getPath(graphId, goal, responses, band),
       ]);
       setRec(rc); setPath(pa.path);
     } catch (e: any) {
@@ -93,14 +113,6 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }
-
-  function toggleKnown(id: string) {
-    setKnown((prev) => {
-      const n = new Set(prev);
-      if (n.has(id)) n.delete(id); else n.add(id);
-      return n;
-    });
   }
 
   return (
@@ -141,25 +153,34 @@ export default function App() {
             <select value={band} onChange={(e) => setBand(e.target.value)}>
               {bands.map((b) => <option key={b.key} value={b.key}>{t.bands[b.key] ?? b.label}</option>)}
             </select>
+            <label>&nbsp;&nbsp;{t.goal}&nbsp;</label>
+            <select value={goal ?? ""} onChange={(e) => setGoal(e.target.value)}>
+              {sorted.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
           </div>
           <p className="hint">{t.s2hint}</p>
+          <div className="legend">
+            <span className="chip confident">✓ {t.r_confident}</span>
+            <span className="chip unsure">~ {t.r_unsure}</span>
+            <span className="chip none">✗ {t.r_none}</span>
+          </div>
           <div className="chips">
             {sorted.map((c) => {
-              const isTarget = target === c.id;
-              const isKnown = known.has(c.id);
+              const rt = rating[c.id] ?? "untested";
               return (
                 <span
                   key={c.id}
-                  className={`chip ${isTarget ? "target" : ""} ${isKnown ? "known" : ""}`}
-                  onClick={() => toggleKnown(c.id)}
+                  className={`chip ${rt}`}
+                  onClick={() => cycleRating(c.id)}
+                  title={t.s2hint}
                 >
-                  {isKnown ? "✓ " : ""}{c.name}
-                  <button className="tbtn" onClick={(e) => { e.stopPropagation(); setTarget(c.id); }}>{t.stuck}</button>
+                  {MARK[rt]}{c.name}
+                  {goal === c.id && <span className="goalflag">🎯</span>}
                 </span>
               );
             })}
           </div>
-          <button disabled={busy || !target} onClick={makePlan}>{t.makePlan}</button>
+          <button disabled={busy || !goal} onClick={makePlan}>{t.makePlan}</button>
         </section>
       )}
 
@@ -178,7 +199,7 @@ export default function App() {
               </span>
             ))}
           </div>
-          <p className="hint">{t.pathHint(target ? byId[target]?.name ?? "" : "")}</p>
+          <p className="hint">{t.pathHint(goal ? byId[goal]?.name ?? "" : "")}</p>
         </section>
       )}
     </div>

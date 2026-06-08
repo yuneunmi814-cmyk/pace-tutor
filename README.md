@@ -111,8 +111,13 @@ Implemented & verified: diagnosis engine, ingest pipeline (all input types),
 curriculum backbone, sidecar API, English-first UI, and a packaged macOS `.app`/`.dmg`
 with the Python backend bundled (verified to launch and connect with no Python install).
 
-Roadmap: in-app diagnostic quizzes (`/v1/questions`), backbone expansion (more
-subjects/languages), Apple notarization, Windows/Linux packaging.
+Diagnosis in the UI is a graded self-assessment (Know it / Unsure / No idea) that
+feeds the BKT engine — chosen over LLM-generated quizzes because a local 8B model
+produces wrong answer keys (measured). A curated question bank is the reliable path
+to auto-graded quizzes.
+
+Roadmap: curated question banks, backbone expansion (more subjects/languages),
+Apple notarization, Windows/Linux packaging.
 
 ## Design references
 
