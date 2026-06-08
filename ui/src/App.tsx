@@ -70,11 +70,13 @@ export default function App() {
   const byId = useMemo(() => Object.fromEntries(concepts.map((c) => [c.id, c])), [concepts]);
   const sorted = useMemo(() => [...concepts].sort((a, b) => a.difficulty - b.difficulty), [concepts]);
 
-  async function doIngest(kind: "transcript" | "sample") {
+  async function doIngest(kind: "transcript" | "sample" | "coding") {
     setBusy(true); setErr(null); setRec(null); setPath([]); setRating({}); setGoal(null); setQuizzes({});
     try {
       const res = kind === "transcript"
         ? await ingestTranscript(transcript)
+        : kind === "coding"
+        ? await ingestConcepts([...SAMPLES[loc].coding], SAMPLES[loc].codingEdges.map((e) => [...e] as [string, string]))
         : await ingestConcepts([...SAMPLES[loc].concepts], SAMPLES[loc].edges.map((e) => [...e] as [string, string]));
       setGraphId(res.graph_id);
       setConcepts(res.concepts);
@@ -165,6 +167,7 @@ export default function App() {
         <div className="row">
           <button disabled={busy} onClick={() => doIngest("transcript")}>{t.ingestLLM}</button>
           <button className="ghost" disabled={busy} onClick={() => doIngest("sample")}>{t.ingestSample}</button>
+          <button className="ghost" disabled={busy} onClick={() => doIngest("coding")}>{t.ingestCoding}</button>
         </div>
       </section>
 

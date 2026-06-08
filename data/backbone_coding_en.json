@@ -1,0 +1,42 @@
+[
+  {"id": "code_variables", "name": "Variables", "prereqs": [], "aliases": ["variable", "var", "variables and values"], "grade": "Intro",
+    "questions": [
+      {"stem": "What does a variable do?", "choices": ["Stores a value you can reuse", "Prints to the screen", "Repeats code", "Defines a web page"], "answer": 0},
+      {"stem": "After x = 5, what is the value of x?", "choices": ["5", "x", "0", "undefined"], "answer": 0}
+    ]},
+  {"id": "code_data_types", "name": "Data Types", "prereqs": ["code_variables"], "aliases": ["data type", "types", "primitive types"], "grade": "Intro",
+    "questions": [
+      {"stem": "Which of these is a Boolean value?", "choices": ["True", "'hello'", "42", "3.14"], "answer": 0},
+      {"stem": "What type is 3.14 usually?", "choices": ["Float", "Integer", "String", "Boolean"], "answer": 0}
+    ]},
+  {"id": "code_operators", "name": "Operators", "prereqs": ["code_data_types"], "aliases": ["operator", "arithmetic operators", "comparison operators"], "grade": "Intro",
+    "questions": [
+      {"stem": "What does the == operator check?", "choices": ["Whether two values are equal", "Assignment", "Addition", "Comments"], "answer": 0},
+      {"stem": "What is the result of 7 % 3?", "choices": ["1", "2", "3", "0"], "answer": 0}
+    ]},
+  {"id": "code_conditionals", "name": "Conditionals", "prereqs": ["code_operators"], "aliases": ["if statements", "conditional statements", "if-else", "branching"], "grade": "Intro",
+    "questions": [
+      {"stem": "An if-statement runs its block when the condition is…", "choices": ["True", "False", "a number", "always"], "answer": 0}
+    ]},
+  {"id": "code_loops", "name": "Loops", "prereqs": ["code_conditionals"], "aliases": ["loop", "iteration", "for loop", "while loop"], "grade": "Intro",
+    "questions": [
+      {"stem": "What is a loop used for?", "choices": ["Repeating a block of code", "Storing a value", "Comparing two values", "Defining a function"], "answer": 0},
+      {"stem": "How many times does 'for i in range(3)' run?", "choices": ["3", "2", "4", "0"], "answer": 0}
+    ]},
+  {"id": "code_arrays", "name": "Arrays and Lists", "prereqs": ["code_loops"], "aliases": ["array", "list", "lists", "arrays"], "grade": "Intro"},
+  {"id": "code_strings", "name": "Strings", "prereqs": ["code_arrays"], "aliases": ["string", "text"], "grade": "Intro"},
+  {"id": "code_functions", "name": "Functions", "prereqs": ["code_loops"], "aliases": ["function", "methods", "subroutines"], "grade": "Intro",
+    "questions": [
+      {"stem": "What does 'return' do in a function?", "choices": ["Sends a value back to the caller", "Repeats the function", "Prints output", "Declares a variable"], "answer": 0},
+      {"stem": "Why use functions?", "choices": ["To reuse code and avoid repetition", "To make code run slower", "To store data permanently", "To style a page"], "answer": 0}
+    ]},
+  {"id": "code_recursion", "name": "Recursion", "prereqs": ["code_functions"], "aliases": ["recursive functions", "recursive function"], "grade": "Core",
+    "questions": [
+      {"stem": "A recursive function is one that…", "choices": ["Calls itself", "Runs forever", "Has no parameters", "Cannot return a value"], "answer": 0},
+      {"stem": "What prevents infinite recursion?", "choices": ["A base case", "A loop", "A variable", "A comment"], "answer": 0}
+    ]},
+  {"id": "code_oop", "name": "Object-Oriented Programming", "prereqs": ["code_functions"], "aliases": ["oop", "classes", "objects", "classes and objects"], "grade": "Core"},
+  {"id": "code_data_structures", "name": "Data Structures", "prereqs": ["code_arrays", "code_functions"], "aliases": ["data structure"], "grade": "Core"},
+  {"id": "code_time_complexity", "name": "Time Complexity", "prereqs": ["code_loops"], "aliases": ["big-o", "big o notation", "complexity", "asymptotic complexity"], "grade": "Core"},
+  {"id": "code_sorting", "name": "Sorting Algorithms", "prereqs": ["code_data_structures", "code_time_complexity"], "aliases": ["sorting", "sort algorithms", "sorting algorithm"], "grade": "Core"}
+]

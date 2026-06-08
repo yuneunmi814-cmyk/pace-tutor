@@ -42,8 +42,9 @@ Two algorithms do the heavy lifting (not the LLM):
 The LLM only extracts *which concepts appear*; prerequisite **structure** comes from a
 curated curriculum backbone (measured: an 8B model alone scores only ~0.33 F1 on
 prerequisite edges, so it can't be trusted for structure — see `eval_extraction.py`).
-Backbones ship for **English and Korean** (`data/backbone_en.json`, `data/backbone_seed.json`);
-content aligns to its own language automatically (different scripts → no collision).
+Backbones ship for **English and Korean** across **math, science, and programming**
+(`data/backbone_*.json`, auto-merged); content aligns to its own language/subject
+automatically (different scripts/ids → no collision).
 
 ## Architecture
 
@@ -101,6 +102,7 @@ Notes:
 .venv/bin/python verify_loaders.py       # video/audio/PDF/text/subtitles → text
 .venv/bin/python verify_backbone.py      # curriculum backbone — Korean (deterministic)
 .venv/bin/python verify_backbone_en.py   # curriculum backbone — English (deterministic)
+.venv/bin/python verify_backbone_coding.py # curriculum backbone — programming (EN+KO)
 .venv/bin/python verify_sidecar.py       # sidecar HTTP API
 .venv/bin/python verify_questions.py     # curated question bank (EN + KO, trusted keys)
 .venv/bin/python eval_extraction.py      # LLM prerequisite-extraction quality

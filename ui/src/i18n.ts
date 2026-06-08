@@ -10,7 +10,8 @@ export const STR = {
     retry: "Retry",
     s1: "1. Add lecture content",
     ingestLLM: "Build concept graph (LLM)",
-    ingestSample: "Try a sample instantly (no LLM)",
+    ingestSample: "Math sample (no LLM)",
+    ingestCoding: "Coding sample (no LLM)",
     s2: "2. Your level & what you know",
     level: "Level",
     goal: "Goal",
@@ -38,7 +39,8 @@ export const STR = {
     retry: "다시 시도",
     s1: "1. 강의 내용 넣기",
     ingestLLM: "개념 그래프 생성 (LLM)",
-    ingestSample: "샘플로 즉시 체험 (LLM 불필요)",
+    ingestSample: "수학 샘플 (LLM 불필요)",
+    ingestCoding: "코딩 샘플 (LLM 불필요)",
     s2: "2. 수준과 아는 정도",
     level: "학습 수준",
     goal: "목표",
@@ -74,6 +76,11 @@ which is called precipitation. So to understand the water cycle, you first need 
       ["Adding Fractions", "Linear Equations"], ["Linear Equations", "Quadratic Equations"],
       ["Factoring", "Quadratic Equations"],
     ] as [string, string][],
+    coding: ["Variables", "Data Types", "Operators", "Conditionals", "Loops", "Functions", "Recursion"],
+    codingEdges: [
+      ["Variables", "Data Types"], ["Data Types", "Operators"], ["Operators", "Conditionals"],
+      ["Conditionals", "Loops"], ["Loops", "Functions"], ["Functions", "Recursion"],
+    ] as [string, string][],
   },
   ko: {
     transcript: `오늘은 물의 순환에 대해 배워보겠습니다. 물은 고체, 액체, 기체 세 가지 상태로 존재합니다.
@@ -86,6 +93,11 @@ which is called precipitation. So to understand the water cycle, you first need 
       ["최대공약수", "약분"], ["최대공약수", "통분"], ["약분", "분수의 덧셈"],
       ["통분", "분수의 덧셈"], ["분수의 덧셈", "일차방정식"],
       ["일차방정식", "이차방정식"], ["인수분해", "이차방정식"],
+    ] as [string, string][],
+    coding: ["변수", "자료형", "연산자", "조건문", "반복문", "함수", "재귀"],
+    codingEdges: [
+      ["변수", "자료형"], ["자료형", "연산자"], ["연산자", "조건문"],
+      ["조건문", "반복문"], ["반복문", "함수"], ["함수", "재귀"],
     ] as [string, string][],
   },
 } as const;

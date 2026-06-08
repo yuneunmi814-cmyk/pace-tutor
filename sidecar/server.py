@@ -39,16 +39,17 @@ _BACKBONE = None
 try:
     import os as _os
     import sys as _sys
+    import glob as _glob
     from ingest.backbone import Backbone
-    # 언어별 백본을 모두 병합 로드 (영어 + 한국어). 후보 디렉터리 탐색(_MEIPASS 포함).
-    _files = ["backbone_en.json", "backbone_seed.json"]
+    # data/ 의 모든 backbone_*.json 을 병합 로드 (언어·과목별 파일 자동 포함).
+    # 후보 디렉터리 탐색(_MEIPASS 포함, 번들 대응).
     _dirs = [
         _os.path.join(_os.path.dirname(__file__), "..", "data"),
         _os.path.join(getattr(_sys, "_MEIPASS", ""), "data"),
         _os.path.join(_os.getcwd(), "data"),
     ]
     for _d in _dirs:
-        _paths = [_os.path.join(_d, f) for f in _files if _os.path.exists(_os.path.join(_d, f))]
+        _paths = sorted(_glob.glob(_os.path.join(_d, "backbone_*.json")))
         if _paths:
             _BACKBONE = Backbone.from_jsons(_paths)
             break
