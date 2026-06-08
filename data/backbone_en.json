@@ -1,0 +1,17 @@
+[
+  {"id": "en_gcd", "name": "Greatest Common Divisor", "prereqs": [], "aliases": ["gcd", "greatest common factor", "gcf", "highest common factor"], "grade": "G5"},
+  {"id": "en_reduce_fraction", "name": "Reducing Fractions", "prereqs": ["en_gcd"], "aliases": ["simplifying fractions", "reduce fractions", "simplify fractions"], "grade": "G5"},
+  {"id": "en_common_denominator", "name": "Common Denominator", "prereqs": ["en_gcd"], "aliases": ["least common denominator", "lcd", "common denominators"], "grade": "G5"},
+  {"id": "en_fraction_add", "name": "Adding Fractions", "prereqs": ["en_reduce_fraction", "en_common_denominator"], "aliases": ["fraction addition", "adding fractions with unlike denominators", "add fractions"], "grade": "G5"},
+  {"id": "en_linear_equation", "name": "Linear Equations", "prereqs": ["en_fraction_add"], "aliases": ["linear equation", "first-degree equations", "solving linear equations"], "grade": "G7"},
+  {"id": "en_polynomial_mult", "name": "Polynomial Multiplication", "prereqs": ["en_linear_equation"], "aliases": ["multiplying polynomials", "expanding polynomials"], "grade": "G8"},
+  {"id": "en_factoring", "name": "Factoring", "prereqs": ["en_polynomial_mult"], "aliases": ["factorization", "factoring polynomials", "factorisation"], "grade": "G9"},
+  {"id": "en_quadratic_equation", "name": "Quadratic Equations", "prereqs": ["en_factoring", "en_linear_equation"], "aliases": ["quadratic equation", "solving quadratics", "quadratics"], "grade": "G9"},
+
+  {"id": "en_states_of_matter", "name": "States of Matter", "prereqs": [], "aliases": ["state of matter", "solid liquid gas", "phases of matter", "states of water", "changes in states of matter", "state changes"], "grade": "G3"},
+  {"id": "en_evaporation", "name": "Evaporation", "prereqs": ["en_states_of_matter"], "aliases": ["evaporate", "vaporization"], "grade": "G4"},
+  {"id": "en_condensation", "name": "Condensation", "prereqs": ["en_states_of_matter"], "aliases": ["condense", "condensing"], "grade": "G4"},
+  {"id": "en_cloud", "name": "Cloud Formation", "prereqs": ["en_condensation"], "aliases": ["clouds", "cloud"], "grade": "G4"},
+  {"id": "en_precipitation", "name": "Precipitation", "prereqs": ["en_cloud"], "aliases": ["rain and snow", "rainfall"], "grade": "G4"},
+  {"id": "en_water_cycle", "name": "Water Cycle", "prereqs": ["en_evaporation", "en_condensation", "en_precipitation"], "aliases": ["the water cycle", "hydrologic cycle", "water cycles"], "grade": "G4"}
+]

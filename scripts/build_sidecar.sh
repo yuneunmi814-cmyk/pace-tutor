@@ -18,7 +18,7 @@ echo "Target triple: ${TRIPLE}"
   --collect-all onnxruntime --collect-all av \
   --collect-all uvicorn --collect-all fastapi --collect-all ollama \
   --collect-submodules engine --collect-submodules ingest --collect-submodules sidecar \
-  --add-data "$(pwd)/data/backbone_seed.json:data" \
+  --add-data "$(pwd)/data:data" \
   --hidden-import ingest.pipeline --hidden-import ingest.stt \
   --hidden-import ingest.loaders --hidden-import ingest.questions \
   sidecar/server.py

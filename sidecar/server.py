@@ -40,14 +40,17 @@ try:
     import os as _os
     import sys as _sys
     from ingest.backbone import Backbone
-    _cands = [
-        _os.path.join(_os.path.dirname(__file__), "..", "data", "backbone_seed.json"),
-        _os.path.join(getattr(_sys, "_MEIPASS", ""), "data", "backbone_seed.json"),
-        _os.path.join(_os.getcwd(), "data", "backbone_seed.json"),
+    # 언어별 백본을 모두 병합 로드 (영어 + 한국어). 후보 디렉터리 탐색(_MEIPASS 포함).
+    _files = ["backbone_en.json", "backbone_seed.json"]
+    _dirs = [
+        _os.path.join(_os.path.dirname(__file__), "..", "data"),
+        _os.path.join(getattr(_sys, "_MEIPASS", ""), "data"),
+        _os.path.join(_os.getcwd(), "data"),
     ]
-    for _bb_path in _cands:
-        if _bb_path and _os.path.exists(_bb_path):
-            _BACKBONE = Backbone.from_json(_bb_path)
+    for _d in _dirs:
+        _paths = [_os.path.join(_d, f) for f in _files if _os.path.exists(_os.path.join(_d, f))]
+        if _paths:
+            _BACKBONE = Backbone.from_jsons(_paths)
             break
 except Exception:
     _BACKBONE = None

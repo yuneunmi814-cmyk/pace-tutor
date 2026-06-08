@@ -42,6 +42,8 @@ Two algorithms do the heavy lifting (not the LLM):
 The LLM only extracts *which concepts appear*; prerequisite **structure** comes from a
 curated curriculum backbone (measured: an 8B model alone scores only ~0.33 F1 on
 prerequisite edges, so it can't be trusted for structure — see `eval_extraction.py`).
+Backbones ship for **English and Korean** (`data/backbone_en.json`, `data/backbone_seed.json`);
+content aligns to its own language automatically (different scripts → no collision).
 
 ## Architecture
 
@@ -97,7 +99,8 @@ Notes:
 .venv/bin/python demo_multisubject.py    # subject-agnostic + level bands
 .venv/bin/python verify_ingest.py        # transcript → graph
 .venv/bin/python verify_loaders.py       # video/audio/PDF/text/subtitles → text
-.venv/bin/python verify_backbone.py      # curriculum backbone (deterministic)
+.venv/bin/python verify_backbone.py      # curriculum backbone — Korean (deterministic)
+.venv/bin/python verify_backbone_en.py   # curriculum backbone — English (deterministic)
 .venv/bin/python verify_sidecar.py       # sidecar HTTP API
 .venv/bin/python eval_extraction.py      # LLM prerequisite-extraction quality
 ```
@@ -108,8 +111,8 @@ Implemented & verified: diagnosis engine, ingest pipeline (all input types),
 curriculum backbone, sidecar API, English-first UI, and a packaged macOS `.app`/`.dmg`
 with the Python backend bundled (verified to launch and connect with no Python install).
 
-Roadmap: in-app diagnostic quizzes (`/v1/questions`), an English curriculum backbone,
-backbone expansion, Apple notarization, Windows/Linux packaging.
+Roadmap: in-app diagnostic quizzes (`/v1/questions`), backbone expansion (more
+subjects/languages), Apple notarization, Windows/Linux packaging.
 
 ## Design references
 

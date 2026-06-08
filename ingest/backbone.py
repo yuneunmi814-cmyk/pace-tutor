@@ -57,6 +57,24 @@ class Backbone:
             data = json.load(f)
         return cls([BackboneConcept(**d) for d in data])
 
+    @classmethod
+    def from_jsons(cls, paths) -> "Backbone":
+        """여러 백본 파일(언어별 등)을 하나로 병합. id 는 파일 간 고유해야 함.
+
+        다른 언어 개념은 표기(스크립트)가 달라 매칭 충돌이 없으므로,
+        영어/한국어 콘텐츠가 각자 자기 언어 백본에 자연히 정렬된다.
+        """
+        concepts: list[BackboneConcept] = []
+        seen_ids: set[str] = set()
+        for p in paths:
+            with open(p, encoding="utf-8") as f:
+                for d in json.load(f):
+                    if d["id"] in seen_ids:
+                        raise ValueError(f"중복 백본 id: {d['id']} ({p})")
+                    seen_ids.add(d["id"])
+                    concepts.append(BackboneConcept(**d))
+        return cls(concepts)
+
     def match(self, surface_name: str, fuzzy: bool = False,
               fuzzy_threshold: float = 0.7, margin: float = 0.08) -> str | None:
         """추출된 개념명을 표준 id 로 매핑.
