@@ -122,6 +122,10 @@ Notes:
 Implemented & verified: diagnosis engine, ingest pipeline (all input types),
 curriculum backbone, sidecar API, English-first UI, and a packaged macOS `.app`/`.dmg`
 with the Python backend bundled (verified to launch and connect with no Python install).
+Bundled **faster-whisper transcription is verified at runtime** (real audio → graph from
+inside the `.app`). A **cross-platform release CI** (`.github/workflows/release.yml`)
+builds macOS/Windows/Linux installers; macOS notarization runs from repo secrets — see
+[docs/DISTRIBUTION.md](docs/DISTRIBUTION.md).
 
 Diagnosis in the UI offers two reliable paths, both feeding the BKT engine:
 - **Auto-graded quiz** from a curated question bank in the backbone (trusted answer
@@ -130,8 +134,8 @@ Diagnosis in the UI offers two reliable paths, both feeding the BKT engine:
 - **Graded self-assessment** (Know it / Unsure / No idea) for concepts without a
   curated quiz.
 
-Roadmap: expand question bank & backbone (more subjects/languages),
-Apple notarization, Windows/Linux packaging.
+Roadmap: expand question bank & backbone (more subjects/languages), supply Apple
+Developer secrets for notarized macOS releases, optional Windows/Linux code signing.
 
 ## Design references
 

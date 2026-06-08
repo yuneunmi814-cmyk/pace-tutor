@@ -1,0 +1,83 @@
+name: release
+
+# 3개 OS에서 각각 Python 사이드카(PyInstaller) + Tauri 앱을 빌드한다.
+# PyInstaller·Tauri 는 크로스컴파일이 안 되므로 반드시 타깃 OS 러너에서 빌드해야 한다.
+# 태그(v*) 푸시 또는 수동 실행으로 트리거. 산출물은 GitHub Release 에 업로드.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            triple: aarch64-apple-darwin
+            sep: ":"
+          - os: ubuntu-latest
+            triple: x86_64-unknown-linux-gnu
+            sep: ":"
+          - os: windows-latest
+            triple: x86_64-pc-windows-msvc
+            sep: ";"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Linux 시스템 의존성 (Tauri WebView) ---
+      - name: Install Linux deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf build-essential curl wget file libssl-dev
+
+      # --- Python 사이드카 빌드 ---
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"   # ctranslate2 등 휠 호환 안정 버전
+      - name: Build Python sidecar (PyInstaller)
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+          python -m PyInstaller -F --name "main-${{ matrix.triple }}" \
+            --distpath ui/src-tauri/binaries \
+            --collect-all faster_whisper --collect-all ctranslate2 --collect-all tokenizers \
+            --collect-all onnxruntime --collect-all av \
+            --collect-all uvicorn --collect-all fastapi --collect-all ollama \
+            --collect-submodules engine --collect-submodules ingest --collect-submodules sidecar \
+            --add-data "data${{ matrix.sep }}data" \
+            --hidden-import ingest.pipeline --hidden-import ingest.stt \
+            --hidden-import ingest.loaders --hidden-import ingest.questions \
+            sidecar/server.py
+
+      # --- 프론트엔드 + Rust ---
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+        working-directory: ui
+      - uses: dtolnay/rust-toolchain@stable
+
+      # --- Tauri 빌드 (+ macOS 서명/공증은 secrets 있을 때만) ---
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          # macOS Developer ID 서명 + 공증 (GitHub repo Secrets 에 등록 시 자동 적용)
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: ui
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          releaseName: "pace-tutor ${{ github.ref_name }}"
+          releaseDraft: true
+          args: ${{ matrix.os == 'macos-latest' && '--target aarch64-apple-darwin' || '' }}
