@@ -112,31 +112,39 @@ def ingest(payload: dict = Body(...)):
       {"video_path": "..."}                      → STT + LLM 추출 (faster-whisper+Ollama)
       {"concepts": [...], "edges": [[prereq, concept], ...]}  → 직접 구성 (LLM 불필요, 결정적)
     """
-    # use_backbone 기본 True: 교육과정 백본으로 LLM 추출 보정 (없으면 자동 무시)
+    # use_backbone 기본 True: 백본을 선택적 오버레이로 사용 (없으면 자동 무시)
     bb = _BACKBONE if payload.get("use_backbone", True) else None
+    # pull_prereqs 기본 True: 강의가 전제하고 안 가르친 하위 기초까지 끌어와 진단 대상에 포함
+    pull = bool(payload.get("pull_prereqs", True))
+    added: list[str] = []  # 자료에 없었지만 백본이 끌어온 하위 선수개념
+
     if payload.get("concepts"):
         names, edges = payload["concepts"], payload.get("edges", [])
         if bb is not None:
-            names, edges = bb.augment(names, edges)
+            added = bb.pulled_prereqs(names) if pull else []
+            names, edges = bb.augment(names, edges, pull_prereqs=pull)
         g = build_graph(names, edges)
     elif payload.get("transcript"):
         from ingest.pipeline import transcript_to_graph  # 지연 import (Ollama)
         g = transcript_to_graph(payload["transcript"],
-                                model=payload.get("model", "llama3.1:8b"), backbone=bb)
+                                model=payload.get("model", "llama3.1:8b"),
+                                backbone=bb, pull_prereqs=pull)
     elif payload.get("video_path"):
         from ingest.pipeline import video_to_graph        # 지연 import (faster-whisper)
         g = video_to_graph(payload["video_path"],
-                           model=payload.get("model", "llama3.1:8b"), backbone=bb)
+                           model=payload.get("model", "llama3.1:8b"),
+                           backbone=bb, pull_prereqs=pull)
     elif payload.get("file_path"):
         from ingest.loaders import source_to_graph        # 영상/오디오/PDF/텍스트/자막 통합
         g = source_to_graph(payload["file_path"],
-                            model=payload.get("model", "llama3.1:8b"), backbone=bb)
+                            model=payload.get("model", "llama3.1:8b"),
+                            backbone=bb, pull_prereqs=pull)
     else:
         raise HTTPException(400, "provide one of: concepts, transcript, video_path, file_path")
 
     graph_id = uuid.uuid4().hex[:8]
     GRAPHS[graph_id] = g
-    return {"graph_id": graph_id, "concepts": _graph_payload(g)}
+    return {"graph_id": graph_id, "concepts": _graph_payload(g), "added_prereqs": added}
 
 
 @app.get("/v1/graph/{graph_id}")

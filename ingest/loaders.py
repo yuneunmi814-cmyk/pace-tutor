@@ -71,8 +71,10 @@ def load_text(path: str, stt_model_size: str = "small",
 
 def source_to_graph(path: str, model: str = "llama3.1:8b", backbone=None,
                     stt_model_size: str = "small", language: str | None = None,
-                    initial_prompt: str | None = None) -> ConceptGraph:
+                    initial_prompt: str | None = None,
+                    pull_prereqs: bool = True) -> ConceptGraph:
     """파일(영상/오디오/PDF/텍스트/자막) → ConceptGraph (통합 진입점)."""
     text = load_text(path, stt_model_size=stt_model_size,
                      language=language, initial_prompt=initial_prompt)
-    return transcript_to_graph(text, model=model, backbone=backbone)
+    return transcript_to_graph(text, model=model, backbone=backbone,
+                               pull_prereqs=pull_prereqs)

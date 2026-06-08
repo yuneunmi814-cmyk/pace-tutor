@@ -32,6 +32,7 @@ export default function App() {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [rating, setRating] = useState<Record<string, Rating>>({});
   const [goal, setGoal] = useState<string | null>(null);
+  const [added, setAdded] = useState<string[]>([]);  // 강의에 없던, 백본이 끌어온 기초
 
   // 자동채점 퀴즈(큐레이션 문항). quizzes: 개념별 문항. activeQuiz: 모달 대상.
   const [quizzes, setQuizzes] = useState<Record<string, Question[]>>({});
@@ -71,7 +72,7 @@ export default function App() {
   const sorted = useMemo(() => [...concepts].sort((a, b) => a.difficulty - b.difficulty), [concepts]);
 
   async function doIngest(kind: "transcript" | "sample" | "coding") {
-    setBusy(true); setErr(null); setRec(null); setPath([]); setRating({}); setGoal(null); setQuizzes({});
+    setBusy(true); setErr(null); setRec(null); setPath([]); setRating({}); setGoal(null); setQuizzes({}); setAdded([]);
     try {
       const res = kind === "transcript"
         ? await ingestTranscript(transcript)
@@ -82,6 +83,7 @@ export default function App() {
       setConcepts(res.concepts);
       const hardest = [...res.concepts].sort((a, b) => b.difficulty - a.difficulty)[0];
       setGoal(hardest?.id ?? null);   // 기본 목표 = 가장 상위(어려운) 개념
+      setAdded(res.added_prereqs ?? []);
       // 큐레이션 문항 프리페치(LLM 아님 — 즉시): 문항 있는 개념만 퀴즈 버튼 노출
       const qmap: Record<string, Question[]> = {};
       await Promise.all(res.concepts.map(async (c) => {
@@ -185,6 +187,7 @@ export default function App() {
             </select>
           </div>
           <p className="hint">{t.s2hint}</p>
+          {added.length > 0 && <p className="added-note">＋ {t.addedNote(added.length)}</p>}
           <div className="legend">
             <span className="chip confident">✓ {t.r_confident}</span>
             <span className="chip unsure">~ {t.r_unsure}</span>
@@ -201,6 +204,7 @@ export default function App() {
                   title={t.s2hint}
                 >
                   {MARK[rt]}{c.name}
+                  {added.includes(c.name) && <span className="addedflag" title="added foundation">＋</span>}
                   {goal === c.id && <span className="goalflag">🎯</span>}
                   {quizzes[c.id] && (
                     <button className="tbtn" onClick={(e) => { e.stopPropagation(); openQuiz(c.id); }}>

@@ -46,10 +46,12 @@ accuracy ~1.0) unlike direct relation extraction (~0.33–0.5 F1). See `eval_str
 
 The **curriculum backbone is an optional overlay**, not a requirement. Its real job is
 the one thing the material *can't* provide: the foundational prerequisites a lecture
-assumes but never states (a quadratics lecture never mentions fractions — yet that may
-be exactly the learner's gap). Backbones ship for **English and Korean** across **math,
-science, and programming** (`data/backbone_*.json`, auto-merged); with `use_backbone`
-off, the app runs fully from the material alone.
+assumes but never states. With `pull_prereqs` (on by default), a lecture that mentions
+only "Quadratic Equations" pulls in fractions, GCD, etc. — so the learner can be checked
+on them and routed all the way down to the real gap (the 9th-grader-missing-fractions
+case). Backbones ship for **English and Korean** across **math, science, and programming**
+(`data/backbone_*.json`, auto-merged); with `use_backbone` off, the app runs fully from
+the material alone (no below-material foundations).
 
 ## Architecture
 
@@ -108,6 +110,7 @@ Notes:
 .venv/bin/python verify_backbone.py      # curriculum backbone — Korean (deterministic)
 .venv/bin/python verify_backbone_en.py   # curriculum backbone — English (deterministic)
 .venv/bin/python verify_backbone_coding.py # curriculum backbone — programming (EN+KO)
+.venv/bin/python verify_pull_prereqs.py  # pull below-material foundations (the core motivation)
 .venv/bin/python verify_sidecar.py       # sidecar HTTP API
 .venv/bin/python verify_questions.py     # curated question bank (EN + KO, trusted keys)
 .venv/bin/python eval_extraction.py      # LLM relation-extraction quality (weak)

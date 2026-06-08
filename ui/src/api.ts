@@ -30,7 +30,13 @@ export async function getBands(): Promise<Band[]> {
   return (await r.json()).bands;
 }
 
-export async function ingestTranscript(transcript: string): Promise<{ graph_id: string; concepts: Concept[] }> {
+export interface IngestResult {
+  graph_id: string;
+  concepts: Concept[];
+  added_prereqs?: string[];  // foundations the lecture assumed but didn't teach
+}
+
+export async function ingestTranscript(transcript: string): Promise<IngestResult> {
   const r = await fetch(`${BASE}/v1/ingest`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -43,7 +49,7 @@ export async function ingestTranscript(transcript: string): Promise<{ graph_id: 
 export async function ingestConcepts(
   concepts: string[],
   edges: [string, string][],
-): Promise<{ graph_id: string; concepts: Concept[] }> {
+): Promise<IngestResult> {
   const r = await fetch(`${BASE}/v1/ingest`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

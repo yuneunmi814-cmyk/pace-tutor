@@ -36,8 +36,12 @@ def _concepts_from_text(text: str, model: str, chunk_size: int, overlap: int) ->
 
 def transcript_to_graph(text: str, model: str = DEFAULT_MODEL,
                         chunk_size: int = 400, overlap: int = 50,
-                        structure: str = "llm-order", backbone=None) -> ConceptGraph:
-    """자막 → ConceptGraph. 개념은 자료에서 추출, 구조는 structure 방식으로 자료에서 도출."""
+                        structure: str = "llm-order", backbone=None,
+                        pull_prereqs: bool = True) -> ConceptGraph:
+    """자막 → ConceptGraph. 개념은 자료에서 추출, 구조는 structure 방식으로 자료에서 도출.
+
+    backbone 이 있으면 자료에 없는 하위 선수개념까지 끌어온다(pull_prereqs).
+    """
     concepts = _concepts_from_text(text, model, chunk_size, overlap)
 
     if structure == "transcript":
@@ -48,7 +52,8 @@ def transcript_to_graph(text: str, model: str = DEFAULT_MODEL,
         edges = chain_edges(order_by_llm(concepts, model=model))
 
     if backbone is not None:
-        names, edge_pairs = backbone.augment(concepts, edges)
+        names, edge_pairs = backbone.augment(concepts, edges, fuzzy=True,
+                                             pull_prereqs=pull_prereqs)
         return build_graph(names, edge_pairs)
     return build_graph(concepts, edges)
 
@@ -56,9 +61,11 @@ def transcript_to_graph(text: str, model: str = DEFAULT_MODEL,
 def video_to_graph(video_path: str, model: str = DEFAULT_MODEL,
                    stt_model_size: str = "base", language: str | None = None,
                    initial_prompt: str | None = None,
-                   structure: str = "llm-order", backbone=None) -> ConceptGraph:
+                   structure: str = "llm-order", backbone=None,
+                   pull_prereqs: bool = True) -> ConceptGraph:
     from .stt import transcribe  # 지연 import (faster-whisper 의존)
 
     text, _segments = transcribe(video_path, model_size=stt_model_size,
                                  language=language, initial_prompt=initial_prompt)
-    return transcript_to_graph(text, model=model, structure=structure, backbone=backbone)
+    return transcript_to_graph(text, model=model, structure=structure,
+                               backbone=backbone, pull_prereqs=pull_prereqs)

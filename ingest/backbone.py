@@ -137,13 +137,38 @@ class Backbone:
         return {"matched": matched, "novel": novel,
                 "rate": round(len(matched) / total, 2)}
 
-    def augment(self, concept_names, llm_edges, fuzzy: bool = False):
+    def _prereq_closure(self, ids) -> set:
+        """주어진 표준 id 들의 선수개념 폐포(자신 + 모든 조상 선수개념)."""
+        closure = set(ids)
+        stack = list(ids)
+        while stack:
+            cid = stack.pop()
+            for pid in self._by_id[cid].prereqs:
+                if pid in self._by_id and pid not in closure:
+                    closure.add(pid)
+                    stack.append(pid)
+        return closure
+
+    def pulled_prereqs(self, concept_names, fuzzy: bool = True) -> list[str]:
+        """자료에 없지만 백본상 필요한 '하위 선수개념'의 표준명 목록.
+
+        예: 입력이 ['이차방정식']뿐이어도 → ['최대공약수','약분','통분','분수의 덧셈',
+        '일차방정식','인수분해','다항식의 곱셈'] 같은, 강의가 전제하고 안 가르친 기초.
+        """
+        matched = {cid for nm in concept_names if (cid := self.match(nm, fuzzy=fuzzy))}
+        closure = self._prereq_closure(matched)
+        return [self._by_id[cid].name for cid in (closure - matched)]
+
+    def augment(self, concept_names, llm_edges, fuzzy: bool = False,
+                pull_prereqs: bool = False):
         """추출 개념 + LLM 엣지 → (표준 정렬된 개념명 목록, (선수, 후속) 엣지쌍 목록).
 
         - 백본에 매칭된 개념: 표준 이름으로 치환 + 백본의 검증된 선수관계 주입
           (단, 양끝이 모두 이번 그래프에 존재하는 엣지만)
         - 매칭 안 된 개념: 원래 이름 유지 + 관련 LLM 엣지 보조 유지
         - fuzzy=True 면 매칭에 보수적 편집거리 보조 사용(match 참고)
+        - pull_prereqs=True 면 **자료에 없는 하위 선수개념까지 끌어와** 그래프에 포함
+          (강의가 전제하고 안 가르친 기초까지 진단·역추적 가능 — 이 앱의 핵심 목적)
         """
         def _match(n):
             return self.match(n, fuzzy=fuzzy)
@@ -171,7 +196,10 @@ class Backbone:
                 name_to_output[nm] = out
             _add(out)
 
-        present_ids = matched_ids
+        # pull_prereqs: 매칭된 개념의 선수 폐포까지 그래프에 끌어온다(자료에 없는 기초 포함)
+        present_ids = self._prereq_closure(matched_ids) if pull_prereqs else matched_ids
+        for cid in present_ids:
+            _add(self._by_id[cid].name)        # 끌어온 하위 개념도 노드로 추가
         id_to_name = {cid: self._by_id[cid].name for cid in present_ids}
         present_output_names = {n for n in present_names}
 

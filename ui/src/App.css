@@ -88,6 +88,11 @@ select {
 .chip.none { background: var(--target-soft); border-color: #f3c0c0; color: var(--target); }
 .chip { padding: 6px 12px; }
 .goalflag { margin-left: 6px; }
+.added-note {
+  background: #eef4ff; color: var(--brand); border: 1px solid #cfe0ff;
+  border-radius: 10px; padding: 8px 12px; font-size: 13px; margin: 4px 0 10px;
+}
+.addedflag { color: var(--brand); font-weight: 800; margin-left: 4px; }
 .legend { display: flex; gap: 8px; margin: 4px 0 10px; }
 .legend .chip { cursor: default; font-size: 12px; padding: 3px 10px; }
 
