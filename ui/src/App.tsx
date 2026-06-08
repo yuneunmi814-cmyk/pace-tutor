@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  connect, getBands, ingestTranscript, ingestConcepts, recommend, getPath,
-  type Concept, type Band, type RecResult,
+  connect, getBands, ingestTranscript, ingestConcepts, recommend, getPath, getQuestions,
+  type Concept, type Band, type RecResult, type Question,
 } from "./api";
 import { STR, SAMPLES, type Locale } from "./i18n";
 import "./App.css";
@@ -32,6 +32,11 @@ export default function App() {
   const [concepts, setConcepts] = useState<Concept[]>([]);
   const [rating, setRating] = useState<Record<string, Rating>>({});
   const [goal, setGoal] = useState<string | null>(null);
+
+  // 자동채점 퀴즈(큐레이션 문항). quizzes: 개념별 문항. activeQuiz: 모달 대상.
+  const [quizzes, setQuizzes] = useState<Record<string, Question[]>>({});
+  const [activeQuiz, setActiveQuiz] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
 
   const [rec, setRec] = useState<RecResult | null>(null);
   const [path, setPath] = useState<string[]>([]);
@@ -66,7 +71,7 @@ export default function App() {
   const sorted = useMemo(() => [...concepts].sort((a, b) => a.difficulty - b.difficulty), [concepts]);
 
   async function doIngest(kind: "transcript" | "sample") {
-    setBusy(true); setErr(null); setRec(null); setPath([]); setRating({}); setGoal(null);
+    setBusy(true); setErr(null); setRec(null); setPath([]); setRating({}); setGoal(null); setQuizzes({});
     try {
       const res = kind === "transcript"
         ? await ingestTranscript(transcript)
@@ -75,6 +80,13 @@ export default function App() {
       setConcepts(res.concepts);
       const hardest = [...res.concepts].sort((a, b) => b.difficulty - a.difficulty)[0];
       setGoal(hardest?.id ?? null);   // 기본 목표 = 가장 상위(어려운) 개념
+      // 큐레이션 문항 프리페치(LLM 아님 — 즉시): 문항 있는 개념만 퀴즈 버튼 노출
+      const qmap: Record<string, Question[]> = {};
+      await Promise.all(res.concepts.map(async (c) => {
+        const qs = await getQuestions(c.name);
+        if (qs.length) qmap[c.id] = qs;
+      }));
+      setQuizzes(qmap);
     } catch (e: any) {
       setErr(e.message ?? String(e));
     } finally {
@@ -90,6 +102,17 @@ export default function App() {
       if (next === "untested") delete n[id]; else n[id] = next;
       return n;
     });
+  }
+
+  function openQuiz(id: string) { setActiveQuiz(id); setAnswers({}); }
+
+  function gradeQuiz() {
+    if (!activeQuiz) return;
+    const qs = quizzes[activeQuiz] ?? [];
+    const correct = qs.reduce((n, q, i) => n + (answers[i] === q.answer_index ? 1 : 0), 0);
+    const rt: Rating = correct === qs.length ? "confident" : correct === 0 ? "none" : "unsure";
+    setRating((prev) => ({ ...prev, [activeQuiz]: rt }));   // 객관 채점 → 등급
+    setActiveQuiz(null);
   }
 
   function buildResponses(): Record<string, number[]> {
@@ -176,6 +199,11 @@ export default function App() {
                 >
                   {MARK[rt]}{c.name}
                   {goal === c.id && <span className="goalflag">🎯</span>}
+                  {quizzes[c.id] && (
+                    <button className="tbtn" onClick={(e) => { e.stopPropagation(); openQuiz(c.id); }}>
+                      📝 {t.quiz}
+                    </button>
+                  )}
                 </span>
               );
             })}
@@ -201,6 +229,32 @@ export default function App() {
           </div>
           <p className="hint">{t.pathHint(goal ? byId[goal]?.name ?? "" : "")}</p>
         </section>
+      )}
+
+      {activeQuiz && (
+        <div className="overlay" onClick={() => setActiveQuiz(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t.quizTitle(byId[activeQuiz]?.name ?? "")}</h3>
+            {(quizzes[activeQuiz] ?? []).map((q, qi) => (
+              <div key={qi} className="qitem">
+                <p className="qstem">{qi + 1}. {q.stem}</p>
+                <div className="qchoices">
+                  {q.choices.map((ch, ci) => (
+                    <label key={ci} className={`qchoice ${answers[qi] === ci ? "sel" : ""}`}>
+                      <input type="radio" name={`q${qi}`} checked={answers[qi] === ci}
+                        onChange={() => setAnswers((p) => ({ ...p, [qi]: ci }))} />
+                      {ch}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="row">
+              <button onClick={gradeQuiz}>{t.quizSubmit}</button>
+              <button className="ghost" onClick={() => setActiveQuiz(null)}>{t.quizClose}</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

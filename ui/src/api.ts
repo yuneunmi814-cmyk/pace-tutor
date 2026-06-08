@@ -72,6 +72,22 @@ export async function recommend(
   return r.json();
 }
 
+export interface Question {
+  stem: string;
+  choices: string[];
+  answer_index: number;
+}
+
+export async function getQuestions(concept: string, n = 3): Promise<Question[]> {
+  const r = await fetch(`${BASE}/v1/questions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ concept, n }),
+  });
+  if (!r.ok) return [];
+  return (await r.json()).questions ?? [];
+}
+
 export async function getPath(
   graph_id: string,
   target: string,

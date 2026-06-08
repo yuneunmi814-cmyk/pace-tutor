@@ -34,6 +34,9 @@ class BackboneConcept:
     aliases: list[str] = field(default_factory=list)    # 표기 변형/STT 오인식 포함
     difficulty: float | None = None
     grade: str = ""
+    # 큐레이션 진단 문항(정답 키 신뢰 가능). 각 항목: {stem, choices, answer(index)}
+    # 로컬 LLM 자동생성은 정답 키가 틀려서(측정됨) 쓰지 않는다 — 객관 채점은 이 문항으로.
+    questions: list = field(default_factory=list)
 
 
 class Backbone:
@@ -100,6 +103,23 @@ class Backbone:
         if best_r >= fuzzy_threshold and (best_r - second_r) >= margin:
             return best_id
         return None
+
+    def questions_for(self, name: str, fuzzy: bool = True) -> list:
+        """개념명에 대한 큐레이션 문항 목록(정답 키 신뢰). 없으면 빈 목록.
+
+        반환 항목: {stem, choices, answer_index}
+        """
+        cid = self.match(name, fuzzy=fuzzy)
+        if not cid:
+            return []
+        out = []
+        for q in self._by_id[cid].questions:
+            out.append({
+                "stem": q["stem"],
+                "choices": q["choices"],
+                "answer_index": q.get("answer", q.get("answer_index", 0)),
+            })
+        return out
 
     def coverage(self, concept_names, fuzzy: bool = False) -> dict:
         """추출 개념들의 백본 커버리지 리포트 — 백본 확충 워크플로우용.

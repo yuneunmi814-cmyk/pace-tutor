@@ -193,14 +193,24 @@ def path(payload: dict = Body(...)):
 
 @app.post("/v1/questions")
 def questions(payload: dict = Body(...)):
-    """개념별 진단 문항 생성 (Ollama 필요).
-      {"concept": "약분", "excerpt": "...", "n": 3}
+    """개념별 진단 문항. 기본은 백본의 **큐레이션 문항**(정답 키 신뢰).
+      {"concept": "약분", "n": 3, "llm": false}
+    백본에 없고 llm=true 면 Ollama 생성으로 폴백(정답 키 신뢰 낮음 — 측정됨).
     """
-    from ingest.questions import make_questions  # 지연 import (Ollama)
-    qs = make_questions(payload["concept"], payload.get("excerpt", ""),
-                        n=int(payload.get("n", 3)),
-                        model=payload.get("model", "llama3.1:8b"))
-    return {"questions": [q.model_dump() for q in qs]}
+    concept = payload["concept"]
+    n = int(payload.get("n", 3))
+    if _BACKBONE is not None:
+        curated = _BACKBONE.questions_for(concept)
+        if curated:
+            return {"questions": curated[:n], "source": "curated"}
+    if payload.get("llm"):
+        from ingest.questions import make_questions  # 지연 import (Ollama)
+        qs = make_questions(concept, payload.get("excerpt", ""), n=n,
+                            model=payload.get("model", "llama3.1:8b"))
+        return {"questions": [{"stem": q.stem, "choices": q.choices,
+                               "answer_index": q.answer_index} for q in qs],
+                "source": "llm"}
+    return {"questions": [], "source": "none"}
 
 
 # ── 종료 제어 (stdin) — PyInstaller 부트로더 PID 함정 회피 ────────────────────

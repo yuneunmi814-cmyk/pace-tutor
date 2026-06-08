@@ -102,6 +102,7 @@ Notes:
 .venv/bin/python verify_backbone.py      # curriculum backbone — Korean (deterministic)
 .venv/bin/python verify_backbone_en.py   # curriculum backbone — English (deterministic)
 .venv/bin/python verify_sidecar.py       # sidecar HTTP API
+.venv/bin/python verify_questions.py     # curated question bank (EN + KO, trusted keys)
 .venv/bin/python eval_extraction.py      # LLM prerequisite-extraction quality
 ```
 
@@ -111,12 +112,14 @@ Implemented & verified: diagnosis engine, ingest pipeline (all input types),
 curriculum backbone, sidecar API, English-first UI, and a packaged macOS `.app`/`.dmg`
 with the Python backend bundled (verified to launch and connect with no Python install).
 
-Diagnosis in the UI is a graded self-assessment (Know it / Unsure / No idea) that
-feeds the BKT engine — chosen over LLM-generated quizzes because a local 8B model
-produces wrong answer keys (measured). A curated question bank is the reliable path
-to auto-graded quizzes.
+Diagnosis in the UI offers two reliable paths, both feeding the BKT engine:
+- **Auto-graded quiz** from a curated question bank in the backbone (trusted answer
+  keys) — used over LLM-generated quizzes because a local 8B model gets its own
+  answers wrong (measured).
+- **Graded self-assessment** (Know it / Unsure / No idea) for concepts without a
+  curated quiz.
 
-Roadmap: curated question banks, backbone expansion (more subjects/languages),
+Roadmap: expand question bank & backbone (more subjects/languages),
 Apple notarization, Windows/Linux packaging.
 
 ## Design references
