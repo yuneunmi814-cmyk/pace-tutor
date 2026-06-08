@@ -39,12 +39,17 @@ Two algorithms do the heavy lifting (not the LLM):
 - **Bayesian Knowledge Tracing** for per-concept mastery (`engine/`)
 - **Prerequisite back-tracking** (ALOSI readiness/remediation scoring) for the path
 
-The LLM only extracts *which concepts appear*; prerequisite **structure** comes from a
-curated curriculum backbone (measured: an 8B model alone scores only ~0.33 F1 on
-prerequisite edges, so it can't be trusted for structure — see `eval_extraction.py`).
-Backbones ship for **English and Korean** across **math, science, and programming**
-(`data/backbone_*.json`, auto-merged); content aligns to its own language/subject
-automatically (different scripts/ids → no collision).
+**Everything is derived from the uploaded material**: concepts are extracted from the
+transcript, and prerequisite *structure* is derived by asking the LLM to order the
+extracted concepts from basic to advanced — a task it does reliably (measured ordering
+accuracy ~1.0) unlike direct relation extraction (~0.33–0.5 F1). See `eval_structure.py`.
+
+The **curriculum backbone is an optional overlay**, not a requirement. Its real job is
+the one thing the material *can't* provide: the foundational prerequisites a lecture
+assumes but never states (a quadratics lecture never mentions fractions — yet that may
+be exactly the learner's gap). Backbones ship for **English and Korean** across **math,
+science, and programming** (`data/backbone_*.json`, auto-merged); with `use_backbone`
+off, the app runs fully from the material alone.
 
 ## Architecture
 
@@ -105,7 +110,8 @@ Notes:
 .venv/bin/python verify_backbone_coding.py # curriculum backbone — programming (EN+KO)
 .venv/bin/python verify_sidecar.py       # sidecar HTTP API
 .venv/bin/python verify_questions.py     # curated question bank (EN + KO, trusted keys)
-.venv/bin/python eval_extraction.py      # LLM prerequisite-extraction quality
+.venv/bin/python eval_extraction.py      # LLM relation-extraction quality (weak)
+.venv/bin/python eval_structure.py       # input-driven structure: ordering accuracy (strong)
 ```
 
 ## Status
