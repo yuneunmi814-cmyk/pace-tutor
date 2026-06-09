@@ -18,16 +18,17 @@ from __future__ import annotations
 from engine import ConceptGraph
 
 from .chunk import chunk_text
-from .extract import extract_concepts, extract_prereqs, DEFAULT_MODEL
+from .extract import extract_concepts, extract_prereqs, detect_lang, DEFAULT_MODEL
 from .graph_build import build_graph
 from .structure import order_by_transcript, order_by_llm, chain_edges
 
 
 def _concepts_from_text(text: str, model: str, chunk_size: int, overlap: int) -> list[str]:
+    lang = detect_lang(text)   # 전체 자막 언어를 한 번 판정해 모든 청크에 동일 적용
     concepts: list[str] = []
     seen: set[str] = set()
     for ch in chunk_text(text, chunk_size=chunk_size, overlap=overlap):
-        for c in extract_concepts(ch, model=model):
+        for c in extract_concepts(ch, model=model, lang=lang):
             if c.lower() not in seen:
                 seen.add(c.lower())
                 concepts.append(c)

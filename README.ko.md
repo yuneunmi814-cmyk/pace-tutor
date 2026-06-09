@@ -13,7 +13,7 @@
 
 [English README →](README.md)
 
-![pace-tutor 스크린샷](docs/screenshot.png)
+![pace-tutor 데모](docs/demo.gif)
 
 ---
 

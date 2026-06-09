@@ -20,25 +20,40 @@ from pydantic import BaseModel
 DEFAULT_MODEL = "llama3.1:8b"
 
 
+def detect_lang(text: str) -> str:
+    """자막 언어 추정(개념 출력 언어 강제용). 한글 비율로 ko/en 판정."""
+    han = sum(1 for c in text if "가" <= c <= "힣")
+    letters = sum(1 for c in text if c.isalpha())
+    if letters and han / letters > 0.15:
+        return "Korean"
+    return "English"
+
+
 # --- 1단계: 개념 목록 ---------------------------------------------------------
 class ConceptList(BaseModel):
     concepts: list[str]
 
 
 CONCEPT_SYS = (
-    "너는 강의 자막에서 학습 '개념(concept)'만 원자적으로 추출하는 도구다. "
-    "개념은 가르치고 평가할 수 있는 최소 학습 단위여야 한다(예: '약분', '최대공약수'). "
-    "자막에 실제로 등장하거나 명백히 전제된 개념만 뽑고, 없는 것은 지어내지 마라. "
-    "개념명은 짧은 명사구로, 자막의 언어를 따른다."
+    "You extract atomic learning 'concepts' from a lecture transcript. "
+    "A concept is the smallest teachable/testable unit. "
+    "Only extract concepts actually present or clearly assumed in the text; never invent. "
+    "Each concept is a short noun phrase."
 )
 
 
-def extract_concepts(chunk: str, model: str = DEFAULT_MODEL) -> list[str]:
+def extract_concepts(chunk: str, model: str = DEFAULT_MODEL,
+                     lang: str | None = None) -> list[str]:
+    lang = lang or detect_lang(chunk)
+    # 출력 언어를 명시적으로 강제 — 자막이 영어면 개념도 영어로(과거 한국어로 새던 문제 해결)
+    directive = (f"IMPORTANT: Write every concept name in {lang} only "
+                 f"(the same language as the transcript).")
     r = chat(
         model=model,
         messages=[
             {"role": "system", "content": CONCEPT_SYS},
-            {"role": "user", "content": f"자막:\n```\n{chunk}\n```\n위에서 학습 개념들을 추출해라."},
+            {"role": "user", "content": f"{directive}\n\nTranscript:\n```\n{chunk}\n```\n"
+                                        f"Extract the learning concepts."},
         ],
         format=ConceptList.model_json_schema(),
         options={"temperature": 0},

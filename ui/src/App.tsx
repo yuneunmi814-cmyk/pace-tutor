@@ -171,6 +171,7 @@ export default function App() {
           <button className="ghost" disabled={busy} onClick={() => doIngest("sample")}>{t.ingestSample}</button>
           <button className="ghost" disabled={busy} onClick={() => doIngest("coding")}>{t.ingestCoding}</button>
         </div>
+        {busy && <p className="loading"><span className="spin" />{t.analyzing}</p>}
       </section>
 
       {concepts.length > 0 && (

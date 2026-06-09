@@ -1,5 +1,11 @@
 # pace-tutor
 
+[![release](https://img.shields.io/github/v/release/yuneunmi814-cmyk/pace-tutor?color=2563eb)](https://github.com/yuneunmi814-cmyk/pace-tutor/releases)
+![platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-444)
+![local-first](https://img.shields.io/badge/local--first-no%20cloud%2C%20no%20account-16a34a)
+![subjects](https://img.shields.io/badge/subjects-math%20%C2%B7%20science%20%C2%B7%20coding%20%C2%B7%20grammar-blue)
+![lang](https://img.shields.io/badge/i18n-English%20%2F%20%ED%95%9C%EA%B5%AD%EC%96%B4-orange)
+
 **Learn at your own pace, not the world's — start from the basics.**
 
 Paste any lecture (video, audio, PDF, or text) and pace-tutor figures out the concepts,
@@ -14,7 +20,7 @@ toggle, and runs **locally** (no cloud, no account).
 
 [한국어 README →](README.ko.md)
 
-![pace-tutor screenshot](docs/screenshot.png)
+![pace-tutor demo](docs/demo.gif)
 
 ---
 

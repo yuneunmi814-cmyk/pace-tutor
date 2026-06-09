@@ -62,6 +62,14 @@ textarea {
 }
 
 .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+.loading { display: flex; align-items: center; gap: 8px; color: var(--brand); font-size: 14px; margin-top: 12px; }
+.spin {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--brand-soft); border-top-color: var(--brand);
+  display: inline-block; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .hint { color: var(--muted); font-size: 13px; margin: 10px 0; }
 
 button {

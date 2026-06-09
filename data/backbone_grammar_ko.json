@@ -1,0 +1,19 @@
+[
+  {"id": "gramko_pos", "name": "품사", "prereqs": [], "aliases": ["품사 분류"], "grade": "입문",
+    "questions": [
+      {"stem": "다음 중 명사는?", "choices": ["강아지", "빠르게", "달리다", "행복한"], "answer": 0},
+      {"stem": "다음 중 동사는?", "choices": ["뛰다", "파란", "탁자", "천천히"], "answer": 0}
+    ]},
+  {"id": "gramko_nouns", "name": "명사", "prereqs": ["gramko_pos"], "aliases": [], "grade": "입문"},
+  {"id": "gramko_verbs", "name": "동사", "prereqs": ["gramko_pos"], "aliases": [], "grade": "입문",
+    "questions": [
+      {"stem": "'가다'의 과거형은?", "choices": ["갔다", "가았다", "갔었다", "가다"], "answer": 0}
+    ]},
+  {"id": "gramko_sva", "name": "주어-동사 일치", "prereqs": ["gramko_nouns", "gramko_verbs"], "aliases": ["수일치", "일치"], "grade": "초급"},
+  {"id": "gramko_tenses", "name": "시제", "prereqs": ["gramko_verbs"], "aliases": ["시제 표현"], "grade": "초급"},
+  {"id": "gramko_sentence", "name": "문장 구조", "prereqs": ["gramko_nouns", "gramko_verbs"], "aliases": ["문장구조", "구문"], "grade": "초급"},
+  {"id": "gramko_clauses", "name": "절", "prereqs": ["gramko_sentence"], "aliases": ["절(clause)"], "grade": "중급"},
+  {"id": "gramko_relative", "name": "관계절", "prereqs": ["gramko_clauses"], "aliases": ["관계대명사", "관계대명사절"], "grade": "중급"},
+  {"id": "gramko_conditionals", "name": "가정법", "prereqs": ["gramko_clauses", "gramko_tenses"], "aliases": ["조건문", "if절"], "grade": "중급"},
+  {"id": "gramko_passive", "name": "수동태", "prereqs": ["gramko_tenses", "gramko_sva"], "aliases": ["피동", "수동"], "grade": "중급"}
+]
