@@ -3,6 +3,7 @@
 [![release](https://img.shields.io/github/v/release/yuneunmi814-cmyk/pace-tutor?color=2563eb)](https://github.com/yuneunmi814-cmyk/pace-tutor/releases)
 ![platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-444)
 ![local-first](https://img.shields.io/badge/local--first-no%20cloud%2C%20no%20account-16a34a)
+![license](https://img.shields.io/github/license/yuneunmi814-cmyk/pace-tutor?color=444)
 ![subjects](https://img.shields.io/badge/subjects-math%20%C2%B7%20science%20%C2%B7%20coding%20%C2%B7%20grammar-blue)
 ![lang](https://img.shields.io/badge/i18n-English%20%2F%20%ED%95%9C%EA%B5%AD%EC%96%B4-orange)
 
@@ -107,5 +108,7 @@ concepts, prerequisites, aliases, and (optional) quiz questions. No code, no wir
 
 ## License
 
-See repository. Built with [Tauri](https://tauri.app), [faster-whisper](https://github.com/SYSTRAN/faster-whisper),
-and [Ollama](https://ollama.com).
+[MIT](LICENSE) © eunmi yun. Built with [Tauri](https://tauri.app),
+[faster-whisper](https://github.com/SYSTRAN/faster-whisper), and [Ollama](https://ollama.com).
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
