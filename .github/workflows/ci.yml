@@ -1,0 +1,50 @@
+name: ci
+
+# Validate every push / PR: backbones load (no cycles, dup ids, broken refs),
+# the engine + pipeline pass deterministic checks, and the UI builds.
+# No Ollama / network needed — these are the offline verify_*.py suites.
+# This is the guard for contributions (esp. new curriculum backbones).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt reportlab httpx
+
+      - name: Backbones load (no cycles / dup ids / broken refs)
+        run: |
+          python -c "import glob; from ingest.backbone import Backbone; \
+          b=Backbone.from_jsons(sorted(glob.glob('data/backbone_*.json'))); \
+          print('loaded', len(b.concepts), 'concepts')"
+
+      - name: Deterministic checks
+        run: |
+          set -e
+          for v in verify_scenario verify_backbone verify_backbone_en \
+                   verify_backbone_coding verify_backbone_match verify_pull_prereqs \
+                   verify_questions verify_loaders verify_sidecar; do
+            echo "== $v =="
+            python $v.py
+          done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build UI (type-check + bundle)
+        run: |
+          cd ui
+          npm ci
+          npm run build

@@ -20,6 +20,6 @@
   {"id": "gram_sentence", "name": "Sentence Structure", "prereqs": ["gram_nouns", "gram_verbs"], "aliases": ["sentence", "sentence structures", "syntax"], "grade": "Elementary"},
   {"id": "gram_clauses", "name": "Clauses", "prereqs": ["gram_sentence"], "aliases": ["clause"], "grade": "Intermediate"},
   {"id": "gram_relative", "name": "Relative Clauses", "prereqs": ["gram_clauses"], "aliases": ["relative clause", "relative pronouns"], "grade": "Intermediate"},
-  {"id": "gram_conditionals", "name": "Conditionals", "prereqs": ["gram_clauses", "gram_tenses"], "aliases": ["conditional", "if clauses"], "grade": "Intermediate"},
+  {"id": "gram_conditionals", "name": "Conditional Sentences", "prereqs": ["gram_clauses", "gram_tenses"], "aliases": ["conditional clauses", "if clauses"], "grade": "Intermediate"},
   {"id": "gram_passive", "name": "Passive Voice", "prereqs": ["gram_tenses", "gram_sva"], "aliases": ["passive", "the passive"], "grade": "Intermediate"}
 ]

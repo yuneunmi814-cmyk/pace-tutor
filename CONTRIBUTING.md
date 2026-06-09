@@ -112,6 +112,10 @@ Run the deterministic checks (no LLM/network needed) — they should all pass:
 cd ui && npm run build        # type-check + build the UI
 ```
 
+**Every PR is auto-checked** by CI (`.github/workflows/ci.yml`): it loads all backbones
+(catching cycles, duplicate ids, and name collisions) and runs the deterministic suite +
+UI build. So if the checks above pass locally, your PR will be green. ✅
+
 If you changed extraction/structure quality, the `eval_*.py` scripts (need Ollama) show
 the impact — include before/after numbers in your PR description; we love measurements. 📊
 

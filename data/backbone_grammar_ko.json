@@ -14,6 +14,6 @@
   {"id": "gramko_sentence", "name": "문장 구조", "prereqs": ["gramko_nouns", "gramko_verbs"], "aliases": ["문장구조", "구문"], "grade": "초급"},
   {"id": "gramko_clauses", "name": "절", "prereqs": ["gramko_sentence"], "aliases": ["절(clause)"], "grade": "중급"},
   {"id": "gramko_relative", "name": "관계절", "prereqs": ["gramko_clauses"], "aliases": ["관계대명사", "관계대명사절"], "grade": "중급"},
-  {"id": "gramko_conditionals", "name": "가정법", "prereqs": ["gramko_clauses", "gramko_tenses"], "aliases": ["조건문", "if절"], "grade": "중급"},
+  {"id": "gramko_conditionals", "name": "가정법", "prereqs": ["gramko_clauses", "gramko_tenses"], "aliases": ["조건절", "if절"], "grade": "중급"},
   {"id": "gramko_passive", "name": "수동태", "prereqs": ["gramko_tenses", "gramko_sva"], "aliases": ["피동", "수동"], "grade": "중급"}
 ]

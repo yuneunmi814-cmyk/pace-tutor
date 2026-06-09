@@ -46,13 +46,20 @@ class Backbone:
         self.concepts = concepts
         self._by_id = {c.id: c for c in concepts}
         # 정규화된 surface form → 표준 id (이름·별칭 모두 등록)
+        # 정규화 surface(이름·별칭) → 표준 id. 내부 id(영문)는 surface 가 아니므로 제외
+        # (등록하면 영어 입력이 한국어 표시명으로 잘못 치환됨 — 다국어 누수 방지)
         self._lookup: dict[str, str] = {}
+        self.collisions: list[tuple] = []   # 동음이의 surface (먼저 등록된 것 유지)
         for c in concepts:
-            # 표시명·별칭만 매칭 키로 등록. 내부 id(영문)는 surface form 이 아니므로 제외
-            # (등록하면 영어 입력이 한국어 표시명으로 잘못 치환됨 — 다국어 누수 방지)
-            self._lookup[_norm(c.name)] = c.id
-            for a in c.aliases:
-                self._lookup[_norm(a)] = c.id
+            for surface in [c.name, *c.aliases]:
+                key = _norm(surface)
+                prev = self._lookup.get(key)
+                if prev is not None and prev != c.id:
+                    # 충돌(교차과목 동음이의 등): 먼저 로드된 것을 유지(파일 알파벳순 → 결정적).
+                    # raise 하지 않음 — 별칭 하나로 백본 전체가 죽는 것을 막는다.
+                    self.collisions.append((surface, prev, c.id))
+                    continue
+                self._lookup[key] = c.id
 
     @classmethod
     def from_json(cls, path: str) -> "Backbone":

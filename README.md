@@ -1,5 +1,6 @@
 # pace-tutor
 
+[![ci](https://github.com/yuneunmi814-cmyk/pace-tutor/actions/workflows/ci.yml/badge.svg)](https://github.com/yuneunmi814-cmyk/pace-tutor/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/yuneunmi814-cmyk/pace-tutor?color=2563eb)](https://github.com/yuneunmi814-cmyk/pace-tutor/releases)
 ![platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-444)
 ![local-first](https://img.shields.io/badge/local--first-no%20cloud%2C%20no%20account-16a34a)
