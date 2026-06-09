@@ -1,122 +1,93 @@
 # pace-tutor
 
-"세상의 진도"가 아니라 **자기 속도로** 학습할 수 있게 돕는 데스크톱 학습 앱.
-영상 강의에서 막힌 학습자를 위해, 개념별 수준을 진단하고 **부족한 선수개념을
-거슬러 올라가** "아주 기본부터" 다시 시작하는 학습 경로를 자동으로 만든다.
+**세상의 진도 말고, 자기 속도로 — 기본부터 다시.**
 
-**교과목 무관**(수학/영어/코딩/역사 등 어떤 과목이든) + **수준대별 페이스메이킹**
-(초등 / 중·고등 / 대학·성인)을 지원한다. 추천 엔진은 교과목·수준대와 무관하게
-보편적이며, 교과목은 `ConceptGraph` 데이터로, 수준대는 `LevelBand`로만 갈린다.
+강의(영상·오디오·PDF·텍스트)를 넣으면 pace-tutor가 개념을 파악하고, 당신이 아는 것을
+점검한 뒤 **개인 맞춤 자기속도 학습경로**를 만듭니다. 강의가 *당연하게 전제한* 선수개념까지
+거슬러 올라가 **진짜 막힌 지점**을 찾아줍니다.
 
-## 현재 상태
+> 왜? 이차방정식에서 막힌 중3 학생은 이차방정식을 못하는 게 아니라, 강의에 안 나온
+> 초등 분수 개념이 비어 있는 경우가 많습니다. pace-tutor는 그걸 찾아 거기서 시작합니다.
 
-✅ **핵심 진단 엔진 구현·검증 완료** (Python 사이드카의 두뇌)
-- 개념별 수준진단: Bayesian Knowledge Tracing
-- 선수개념 역추적 추천: ALOSI substrategy P/R/C/D
+**모든 과목**(수학·과학·코딩 등) 지원, **영어 우선 + 한국어 토글**, **로컬 실행**(클라우드·계정 불필요).
 
-✅ **영상→개념그래프 ingest 파이프라인 구현·검증 완료**
-- STT(faster-whisper) → 청킹 → **Ollama 제약 디코딩 2단계 추출** → DAG화/난이도 → `ConceptGraph`
-- 환각 차단: `format=schema` + 개념목록 확정 후 그 안에서만 선수관계 추출
-- 순환 자동 제거(`break_cycles`)로 DAG 보장 → 엔진과 end-to-end 결합 확인
+[English README →](README.md)
 
-✅ **사이드카 HTTP API 구현·검증 완료** (`sidecar/server.py`, FastAPI)
-- engine+ingest 를 감싼 REST: `/v1/ingest`(자막/영상/직접개념), `/v1/recommend`, `/v1/path`, `/v1/questions`
-- stdin `"sidecar shutdown"` 종료(PyInstaller 부트로더 PID 함정 회피) — 실프로세스 검증 완료
-- 이 API 가 곧 Tauri UI 가 호출할 계약
+![pace-tutor 스크린샷](docs/screenshot.png)
 
-✅ **추출 품질 — 측정 + 교육과정 백본** (핵심 신뢰성 확보)
-- 측정(`eval_extraction.py`): 로컬 8B 모델은 교과서적 사슬에서도 **선수관계 F1 ~0.33** (기초 엣지 매번 누락) → LLM 단독 신뢰 불가
-- 해법(`ingest/backbone.py` + `data/backbone_seed.json`): 표준 개념·검증된 선수관계·별칭 사전.
-  LLM 은 "개념↔표준" 매핑만, 선수관계는 백본에서 주입 → **STT 오인식·LLM 엣지 0개에도 완전한 DAG 결정적 보장**
-- 매칭 = 정확/별칭(권위) + **보수적 퍼지**(긴 변형만, 오탐 없음) + `coverage()` 리포트(확충 가이드)
-- 부정 결과 기록: 로컬 임베딩(nomic-embed-text)은 한국어 개념 매칭 변별력 없음 → 결정적 매칭 채택
-- `verify_backbone.py`/`verify_backbone_match.py` 통과. 사이드카 `/v1/ingest`에 `use_backbone` 기본 적용
+---
 
-✅ **React UI 구현·검증 완료** (`ui/`, Vite + React + TS, 라이트테마, 영문 우선 i18n)
-- 플로우: 강의 내용 입력 → 개념 그래프 → 수준대·막힌개념 선택 → 학습경로(스테퍼)
-- **영문 우선(English-first) + EN/한국어 토글**(`ui/src/i18n.ts`), 로케일별 샘플. 전 세계 사용 대비
-- 사이드카(:8008) API 호출. `tsc`+`vite build` 통과, 헤드리스 Chrome 스크린샷으로 EN/KO·플로우·수준대 확인
+## 🚀 5분 만에 체험하기
 
-✅ **Tauri 데스크톱 앱 패키징 완료** (`ui/src-tauri/`)
-- Rust 셸(lib.rs)이 Python 사이드카를 spawn/모니터, stdin 종료(부트로더 PID 함정 회피)
-- PyInstaller 단일 바이너리(75M) → `.app`에 동봉. `tauri build` 성공: **`pace-tutor.app`(90M) + `.dmg`(80M)** 생성, adhoc 서명
-- 사이드카 바이너리 단독 실행 검증(기동·ingest·recommend·종료). 산출물: `ui/src-tauri/target/release/bundle/`
+### 방법 A — 앱 다운로드 (설치 불필요, 추천)
 
-남은 (선택): macOS 공증(배포 시), faster-whisper 번들 내 전사 런타임 검증, 영어 백본 추가, 백본 확충, pyBKT 연동.
-※ 런타임 전제: Ollama 데몬(LLM/STT 추출 시) — 직접개념 플로우는 불필요.
-설계 근거: [prerequisite-diagnosis-reference.md](prerequisite-diagnosis-reference.md),
-[video-to-conceptgraph-reference.md](video-to-conceptgraph-reference.md).
+1. **[Releases](https://github.com/yuneunmi814-cmyk/pace-tutor/releases)** 에서 OS에 맞게 받기:
+   - **macOS**: `pace-tutor_*_aarch64.dmg`
+   - **Windows**: `pace-tutor_*_x64-setup.exe`
+   - **Linux**: `pace-tutor_*_amd64.AppImage` (또는 `.deb` / `.rpm`)
+2. 실행 (첫 실행은 엔진 부팅에 ~10초)
+3. **“Coding sample”** 또는 **“Math sample”** 클릭 → 아는 개념 몇 개 표시 →
+   **“Build my learning path”** → 어디서 시작할지 바로 나옵니다. ✅
 
-## 구조
+샘플은 **아무것도 더 설치할 필요 없이** 동작합니다. *내 강의*(영상/PDF/텍스트)를 분석하려면
+[Ollama](https://ollama.com) 설치 후 `ollama pull llama3.1:8b` 만 하면 됩니다(로컬에서 사용).
 
-```
-engine/
-  core.py        # ALOSI 순수 수학 함수 (numpy) — 추천 점수, BKT 업데이트
-  concepts.py    # 개념 노드 + 선수개념 DAG (순환 검증)
-  diagnosis.py   # 학습자 개념별 숙달확률 추적 (BKT) + 수준대 바닥 적용
-  recommender.py # "지금 학습할 단 하나의 개념" 추천
-  levels.py      # 수준대(초등/중고등/대학·성인) — 바닥·입도·어투
-ui/src-tauri/    # Tauri v2 데스크톱 셸 (Rust) — 사이드카 spawn, externalBin 번들
-ui/src/i18n.ts   # 영문 우선 i18n (EN/한국어) + 로케일별 샘플
-ingest/
-  loaders.py     # 영상/오디오/PDF/텍스트/자막 → 텍스트 (통합 진입점 source_to_graph)
-  stt.py         # 영상·오디오 → 자막 (faster-whisper)
-  chunk.py       # 자막 청킹
-  extract.py     # LLM 2단계 추출 (Ollama format=schema 제약 디코딩)
-  graph_build.py # 중복제거 + DAG 순환제거 + 난이도 → ConceptGraph
-  questions.py   # 개념별 진단 문항 생성
-  backbone.py    # 교육과정 백본 — 표준개념 매핑 + 검증된 선수관계 주입
-  pipeline.py    # transcript_to_graph / video_to_graph (backbone 지원)
-data/
-  backbone_seed.json   # 백본 시드(수학 분수·대수 / 과학 물의순환, STT오류 별칭 포함)
-sidecar/
-  server.py      # FastAPI(:8008) — engine+ingest HTTP API + stdin 종료 + 백본
-verify_scenario.py     # 중3 이차방정식 → 기초 역추적 검증
-demo_multisubject.py   # 교과목 무관성 + 수준대 페이스메이킹 데모(프로그래밍·영어)
-verify_ingest.py       # 자막→그래프 추출 검증(1부 코어 결정적 / 2부 실제 LLM)
-verify_sidecar.py      # 사이드카 API 검증(1부 in-process / 2부 실프로세스+stdin종료)
-verify_backbone.py     # 백본 검증(결정적) — 노이즈 입력에도 올바른 경로
-verify_backbone_match.py # 매칭/커버리지 검증(정확·별칭·보수적 퍼지·coverage)
-eval_extraction.py     # LLM 선수관계 추출 품질 측정(one-shot vs 페어와이즈)
-```
+### 방법 B — 소스로 실행 (개발자용)
 
-## 실행 (UI + 사이드카)
+**Python 3.11+** 와 **Node 18+** 필요.
 
 ```bash
-# 1) 사이드카(백엔드)
-.venv/bin/python -m sidecar.server   # http://127.0.0.1:8008/docs (Swagger)
-# 2) UI (다른 터미널)
-cd ui && npm install && npm run dev   # http://localhost:5173
+git clone https://github.com/yuneunmi814-cmyk/pace-tutor.git
+cd pace-tutor
+
+# 1) 백엔드 (터미널 1)
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m sidecar.server          # → http://127.0.0.1:8008
+
+# 2) 프론트엔드 (터미널 2)
+cd ui && npm install && npm run dev          # → http://localhost:5173 열기
 ```
-(Tauri 데스크톱 빌드는 Rust 설치 후 — tauri-python-sidecar-reference.md 참조)
 
-## 의존성
+브라우저에서 샘플 클릭 — 위와 같은 3단계입니다.
 
-- Python: `pip install -r requirements.txt`
-- 로컬 LLM: [Ollama](https://ollama.com) 데몬 + `ollama pull llama3.1:8b`
-- STT: 시스템 `ffmpeg` (영상 디코딩)
+> API 키·가입 없음. Ollama는 *내 강의*를 넣을 때만 필요하고, 내장 샘플·퀴즈는 없어도 됩니다.
 
-## 실행
+---
+
+## 어떻게 동작하나
+
+```
+영상 / 오디오 / PDF / 텍스트
+        │   '내 자료'에서 개념 추출 (+ 기초→고급 정렬)
+        ▼
+   개념 그래프 ──► 진단(퀴즈/자기평가) ──► 자기속도 학습경로
+        ▲                                  "지금 시작할 것" + 단계별
+        └── 커리큘럼 백본(선택): 강의가 전제하고 안 가르친 기초를 끌어와
+            진짜 막힌 곳까지 역추적
+```
+
+학습경로는 LLM이 아니라 검증된 두 알고리즘이 만듭니다: 숙달도는 **Bayesian Knowledge
+Tracing**, 순서는 **선수개념 역추적**. LLM은 개념을 뽑고 정렬만, 신뢰할 수 있는 구조는 백본이.
+
+빌드·배포는 [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md), 설계 근거는 `*-reference.md` 참고.
+
+## 폴더 구조
+
+```
+engine/    진단 + 추천 (numpy) — 과목·언어 무관
+ingest/    자료 → 개념 그래프: 로더, STT, LLM 추출, 백본
+sidecar/   FastAPI 서버(:8008) — engine+ingest 래핑 (앱에 번들)
+ui/        Vite+React 데스크톱 UI (라이트테마, 영어우선) + Tauri 셸
+data/      커리큘럼 백본 (수학/과학/코딩, EN+KO)
+```
+
+## 기여 / 확장
+
+과목 추가는 **데이터만 넣으면 됩니다** — `data/backbone_<과목>_<언어>.json` 에 개념·선수관계·
+별칭·(선택)퀴즈를 적으면 끝. 검증:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python verify_scenario.py
-```
-
-## 사용 예
-
-```python
-from engine import ConceptGraph, Concept, LearnerState, Recommender
-
-graph = ConceptGraph([
-    Concept("gcd", "최대공약수", prereqs=[], difficulty=0.1),
-    Concept("reduce_fraction", "약분", prereqs=["gcd"], difficulty=0.2),
-    # ...
-])
-learner = LearnerState(graph)
-rec = Recommender(graph, r_star=0.0, W_p=2.0)
-
-learner.update_many("quadratic_equation", [0, 0, 0])  # 이차방정식 다 틀림
-print(rec.next_concept(learner).name)  # → "최대공약수" (뿌리 기초로 역추적)
+.venv/bin/python verify_scenario.py        # 핵심 진단 + 역추적
+.venv/bin/python verify_backbone.py        # 백본 (결정적)
+.venv/bin/python verify_pull_prereqs.py    # 자료 아래 기초 끌어오기
 ```
