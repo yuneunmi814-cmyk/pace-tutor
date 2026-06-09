@@ -1,5 +1,9 @@
 numpy>=2.0
 
+# 사이드카 HTTP 서버 (sidecar/server.py)
+fastapi>=0.100
+uvicorn>=0.23
+
 # ingest 파이프라인 (영상/오디오/PDF/텍스트 → 개념 그래프)
 ollama>=0.4          # 로컬 LLM 추출 (format=schema 제약 디코딩)
 pydantic>=2.0        # 추출 스키마
