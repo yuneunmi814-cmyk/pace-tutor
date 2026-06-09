@@ -94,7 +94,9 @@ data/      curriculum backbones (math / science / programming, EN + KO)
 ## Contributing / extending
 
 Adding a subject is **just data** — drop a `data/backbone_<subject>_<lang>.json` with
-concepts, prerequisites, aliases, and (optional) quiz questions. Run the checks:
+concepts, prerequisites, aliases, and (optional) quiz questions. No code, no wiring.
+
+👉 **[CONTRIBUTING.md](CONTRIBUTING.md)** has a copy-paste template and a ~5-minute first PR.
 
 ```bash
 .venv/bin/python verify_scenario.py        # core diagnosis + back-tracking
